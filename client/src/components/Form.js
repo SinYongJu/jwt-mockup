@@ -7,6 +7,7 @@ const AUTH = 'http://localhost:8080/auth';
 const Form = (props, { children}) =>{
   const [userName, setUserName] = useState('')
   const [pwd, setPwd] = useState('')
+  const [token, setToken] = useState('')
   
   const onChangeUserName = (e)=>{
     setUserName(e.target.value)
@@ -17,11 +18,26 @@ const Form = (props, { children}) =>{
   }
   
   const onSubmit = (e) => {
-    console.log('props',props)
-
     e.preventDefault();
+  
+    const data = login().then((data) => {
+      console.log(data)
+      setToken(data.token)
+      props.history.push('/') // home 진입
+    })
+  }
 
-    props.history.push('/') // home 진입
+  const login = async () => {
+    const body = {id : 1, name : 'lukas'};
+    const res = await fetch(AUTH,{
+      method : 'post',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body : JSON.stringify(body)
+    })
+    const data = await res.json().catch(err => console.log(err))
+    return data
   }
 
   useEffect(()=>{

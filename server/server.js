@@ -9,17 +9,46 @@ const config = require('./config.js')
 
 
 // jwt
+const user = {
+  data : {id : 1 ,
+          name : 'lukas'},
+  iat: Math.floor(Date.now() / 1000) - 30,
+  exp: Math.floor(Date.now() / 1000) + (60 * 2),
+}
+
 
 app.use(bodyParser.urlencoded({extended : false}))
+app.use(bodyParser.json())
 app.use(cors())
+app.use(router)
 
-app.post('/auth',(req,res) => {
-  console.log('post', req.body)
-  var token = JSON.stringify({ header : {alg : 'HS523' , typ : 'jwt'},data:{foo: 'bar'},key :config.secret})
-  res.send(token)
+router.post('/auth',(req,res) => {
+  console.log(req.body)
+  if(req.body.id === user.data.id && req.body.name === user.data.name){
+    console.log('access')
+    jwt.sign(user,config.secret,(err, token)=>{
+      if(err){
+        console.log(err)
+      }
+      res.status(200).json( {
+        code : '200',
+        message : 'success',
+        token
+      })
+    })
+  }else{
+    res.status(403).json({
+      code : '403',
+      message : 'Forbidden'})
+  }
 })
 
-app.get('/',(req,res) => {
+router.post('/verify',(req,res) => {
+  console.log('verify acccess')
+  
+})
+
+router.get('/',(req,res) => {
   console.log('get')
   res.send('Hello World')
 })
