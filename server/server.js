@@ -11,7 +11,9 @@ const config = require('./config.js')
 // jwt
 const user = {
   data : {id : 1 ,
-          name : 'lukas'},
+          name : 'lukas',
+          pwd : '1234'
+        },
   iat: Math.floor(Date.now() / 1000) - 30,
   exp: Math.floor(Date.now() / 1000) + (60 * 2),
 }
@@ -24,7 +26,7 @@ app.use(router)
 
 router.post('/auth',(req,res) => {
   console.log(req.body)
-  if(req.body.id === user.data.id && req.body.name === user.data.name){
+  if(req.body.pwd === user.data.pwd && req.body.name === user.data.name){
     console.log('access')
     jwt.sign(user,config.secret,(err, token)=>{
       if(err){

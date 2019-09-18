@@ -19,16 +19,16 @@ const Form = (props, { children}) =>{
   
   const onSubmit = (e) => {
     e.preventDefault();
-  
-    const data = login().then((data) => {
-      console.log(data)
+    const body = {name : userName , pwd};
+    login(body).then((data) => {
+      console.log('login' + data)
       setToken(data.token)
       props.history.push('/') // home 진입
     })
   }
 
-  const login = async () => {
-    const body = {id : 1, name : 'lukas'};
+  const login = async (body) => {
+   
     const res = await fetch(AUTH,{
       method : 'post',
       headers: {
