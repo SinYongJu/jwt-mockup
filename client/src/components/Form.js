@@ -17,11 +17,12 @@ const Form = (props, { children}) =>{
   }
   
   const onSubmit = (e) => {
-    console.log('props',props)
-
     e.preventDefault();
-
-    props.history.push('/') // home 진입
+    const data = JSON.stringify({data: 'datass'})
+    fetch('http://127.0.0.1:8080/auth',
+        { method : 'POST',mnode : 'cors', body: data,
+        headers :{'Content-Type': 'application/json'}}).then((res)=>{console.log(res)})
+    //props.history.push('/') // home 진입
   }
 
   useEffect(()=>{
