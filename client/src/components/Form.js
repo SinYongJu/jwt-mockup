@@ -1,14 +1,19 @@
-import React,{useState,useEffect} from 'react';
+import React,{useState,useEffect,useContext} from 'react';
 import { withRouter } from 'react-router-dom'
 import style from './Form.scss'
+import {FormContext} from '../context/FormContext'
+import {verify,login} from '../api/auth'
 
-const AUTH = 'http://localhost:8080/auth';
 
-const Form = (props, { children}) =>{
-  const [userName, setUserName] = useState('')
-  const [pwd, setPwd] = useState('')
-  const [token, setToken] = useState('')
-  
+
+
+
+const Form = (props) =>{
+  const {isAuth,settingToken,removeToken} = useContext(FormContext)
+  const [userName, setUserName] = useState('lukas')
+  const [pwd, setPwd] = useState('1234')
+
+
   const onChangeUserName = (e)=>{
     setUserName(e.target.value)
   }
@@ -16,53 +21,44 @@ const Form = (props, { children}) =>{
   const onChangePwd = (e)=>{
     setPwd(e.target.value)
   }
-  
+
+  const errorHandler = (err) => console.log(err)
   const onSubmit = (e) => {
+    
     e.preventDefault();
-    const body = {name : userName , pwd};
-    login(body).then((data) => {
-      console.log('login' + data)
-      setToken(data.token)
-      props.history.push('/') // home 진입
-    })
+      const body = {name : userName , pwd};
+      login(body,(data) => {
+        console.log('Form', data)
+        settingToken(data)        
+        props.history.push('/') // home 진입  
+      },errorHandler)
+    
   }
 
-  const login = async (body) => {
-   
-    const res = await fetch(AUTH,{
-      method : 'post',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body : JSON.stringify(body)
-    })
-    const data = await res.json().catch(err => console.log(err))
-    return data
+  const onClickLogout = ()=>{
+    console.log('click')
+    removeToken();
   }
 
-  useEffect(()=>{
-    
-    const onChangeUserName = (e)=>{
-      setUserName(e.target.name)
-    }
-
-    const onChangePwd = (e)=>{
-      setPwd(e.target.value)
-    }
-    
-  },[userName,pwd])
-  
   return (
     <>
     <h2>Login</h2>
+    <button onClick={onClickLogout}>Logout</button>
     <form className="formLogin" method="POST" onSubmit={onSubmit}>
       <fieldset>
         <legend>Login field</legend>
+        {!isAuth ? 
+        <>
         <label htmlFor="username">Username</label>
         <input type="text" id="userName" onChange={(e)=>onChangeUserName(e)} name="username"/>
         <label htmlFor="password">Password</label>
         <input type="password" id="password"onChange={(e)=>onChangePwd(e)} name="pwd"/>
-        <button type="submit">Login</button>
+        <button type="submit">Login</button>  
+        </>  
+        :
+        <p>aready login</p>
+        }
+        
       </fieldset>
     </form>
     </>

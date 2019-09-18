@@ -10,6 +10,7 @@ const Header = ({children}) => {
       <ul>
         <li><Link to="/">home</Link></li>
         <li><Link to="/login">login</Link></li>
+        <li><Link to="/private">private</Link></li>
       </ul>
   </header>)
 }

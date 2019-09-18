@@ -1,6 +1,7 @@
-import React from 'react';
+import React,{useContext} from 'react';
 import Header from './components/Header'
 import Form from './components/Form'
+import {FormContext,FormProvider} from './context/FormContext'
 import { BrowserRouter as Router, Route, Link ,Switch, Redirect } from "react-router-dom";
 
 const Home = () => {
@@ -9,12 +10,15 @@ const Home = () => {
 const NotFound= () => {
   return (<h2>404 notFound</h2>)
 }
+const Private = () => {
+  return (<h2>Private</h2>)
+}
 
 const App = () => {
   let title = 'Home';
-  let isAuth = false;
-  
 const PrivateRoute = ({component : Component, ...rest}) => {
+  const {isAuth,isDoingAuth} = useContext(FormContext)
+  isDoingAuth()
   return (
     <Route
     {...rest}
@@ -27,16 +31,19 @@ const PrivateRoute = ({component : Component, ...rest}) => {
 }
   return (
     <div className="App">
+      <FormProvider>
        <Router>
           <Header>JWT-Mockup</Header>
           <div>
             <Switch>
               <PrivateRoute path="/" exact component={Home}></PrivateRoute>
+              <PrivateRoute path="/private" exact component={Private}></PrivateRoute>
               <Route path="/login" component={Form}></Route>
               <Route path="*" component={NotFound}></Route>
             </Switch>
           </div>
       </Router>
+      </FormProvider>
     </div>
   );
 }

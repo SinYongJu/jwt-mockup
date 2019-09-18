@@ -9,14 +9,26 @@ const config = require('./config.js')
 
 
 // jwt
+/**
+ * 
+ * 
+ * jwt의 전달시 필드 값들은 거의 3자로 
+ * 제한한다
+ * 공식 사이트 참고 
+ * 
+ * 
+ */
+
+const setIat = () => Math.floor(Date.now() / 1000) - 30
+const setExp = () => Math.floor(Date.now() / 1000) + (60 * 3)
+
 const user = {
   data : {id : 1 ,
           name : 'lukas',
           pwd : '1234'
-        },
-  iat: Math.floor(Date.now() / 1000) - 30,
-  exp: Math.floor(Date.now() / 1000) + (60 * 2),
+        }
 }
+
 
 
 app.use(bodyParser.urlencoded({extended : false}))
@@ -25,16 +37,18 @@ app.use(cors())
 app.use(router)
 
 router.post('/auth',(req,res) => {
-  console.log(req.body)
+  console.log('request body',req.body)
   if(req.body.pwd === user.data.pwd && req.body.name === user.data.name){
     console.log('access')
-    jwt.sign(user,config.secret,(err, token)=>{
+    const tokenUserData = {...user, iat: setIat(),exp: setExp()}
+    jwt.sign(tokenUserData,config.secret,(err, token)=>{
       if(err){
         console.log(err)
       }
-      res.status(200).json( {
+     res.status(200).json({
         code : '200',
         message : 'success',
+        exp : tokenUserData.exp,
         token
       })
     })
@@ -46,7 +60,15 @@ router.post('/auth',(req,res) => {
 })
 
 router.post('/verify',(req,res) => {
+  const token = req.header('Authorization').split(' ')[1];
   console.log('verify acccess')
+  jwt.verify(token, config.secret,(err, decoded)=> {
+    if(err){
+      return res.status(500).json({code : 500, message : err, auth : false})
+    }
+    console.log(decoded) // data
+    return res.json({code : 200, message : 'success', auth : true})
+  });
   
 })
 
