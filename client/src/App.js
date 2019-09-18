@@ -14,15 +14,19 @@ const Private = () => {
   return (<h2>Private</h2>)
 }
 
+
 const App = () => {
   let title = 'Home';
+
+
 const PrivateRoute = ({component : Component, ...rest}) => {
   const {isAuth,isDoingAuth} = useContext(FormContext)
-  isDoingAuth()
+ 
   return (
     <Route
     {...rest}
     render ={ (props) => {
+      isDoingAuth(() =>{ },() =>{ props.history.push('/login') })
       return isAuth ? <Component {...props}></Component> : <Redirect to={{ pathname: "/login", state: { from: props.location }}}/>
       }
     }>  

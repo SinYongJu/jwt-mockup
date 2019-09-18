@@ -1,6 +1,6 @@
 import React,{useState,useEffect,createContext} from 'react';
 import {setCookie, getCookie ,deleteCookie} from '../util/cookie';
-import {verify,login} from '../api/auth'
+import {verify} from '../api/auth'
 
 const FormContext = createContext();
 
@@ -10,7 +10,7 @@ const authCookieCheck = () => {
 
 
 
-const FormProvider = ({children,...props}) => {
+const FormProvider = (props) => {
   const [isAuth, setIsAuth] = useState(authCookieCheck())
   const [token, setToken] = useState()
 
@@ -25,30 +25,26 @@ const FormProvider = ({children,...props}) => {
     if(token && token.message){
       console.log('token',token.exp)
       setCookie('token',token.token,token.exp)
+      setIsAuth(true)
     }
-    setIsAuth(authCookieCheck())
   },[token])
-  
-  useEffect(()=>{
-    isDoingAuth()
-  },[isAuth])
 
-  const isDoingAuth = ()=> {
-    const token = getCookie('token');
-    if(token){
-      verify(token.token,
-        ()=>{
+  const isDoingAuth = (success, fail)=> {
+    const vetifyToken = getCookie('token')
+    if(isAuth){
+      console.log('verify')
+      verify(vetifyToken,
+        (data)=>{
           setIsAuth(true)
           console.log('success')
-          alert(isAuth) 
+          success(data)
           return true
         },
         (err)=>{
           removeToken()
           alert('login again')
           console.log('fail')
-          alert(isAuth)
-          props.history.push('/login')
+          fail(err)
           return false
         }
       ) // return bool
@@ -57,7 +53,7 @@ const FormProvider = ({children,...props}) => {
 
   return <FormContext.Provider 
   value={{token, settingToken ,isAuth, authCookieCheck,isDoingAuth,removeToken}}
-  >{children}</FormContext.Provider>
+  >{props.children}</FormContext.Provider>
 }
 
 const FormConsumer = FormContext.Consumer;

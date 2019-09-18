@@ -2,7 +2,7 @@ import React,{useState,useEffect,useContext} from 'react';
 import { withRouter } from 'react-router-dom'
 import style from './Form.scss'
 import {FormContext} from '../context/FormContext'
-import {verify,login} from '../api/auth'
+import {login} from '../api/auth'
 
 
 
@@ -28,7 +28,6 @@ const Form = (props) =>{
     e.preventDefault();
       const body = {name : userName , pwd};
       login(body,(data) => {
-        console.log('Form', data)
         settingToken(data)        
         props.history.push('/') // home 진입  
       },errorHandler)
@@ -43,7 +42,7 @@ const Form = (props) =>{
   return (
     <>
     <h2>Login</h2>
-    <button onClick={onClickLogout}>Logout</button>
+    <button type="button" className="logout" onClick={onClickLogout}>Logout</button>
     <form className="formLogin" method="POST" onSubmit={onSubmit}>
       <fieldset>
         <legend>Login field</legend>
@@ -56,7 +55,7 @@ const Form = (props) =>{
         <button type="submit">Login</button>  
         </>  
         :
-        <p>aready login</p>
+        <p>already login</p>
         }
         
       </fieldset>

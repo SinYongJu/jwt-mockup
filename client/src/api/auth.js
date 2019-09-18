@@ -3,7 +3,9 @@ const URL = 'http://localhost:8080';
     fetch(URL+urlString ,option)
       .then(res => res.json())
       .then(data =>{
-        success(data)
+        // if(data.code == 200){
+          success(data)
+        // }
       })
       .catch(err => error(err))
   }

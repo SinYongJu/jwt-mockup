@@ -2,13 +2,8 @@
 
 export const setCookie = (cname, cvalue, cexp) =>{
   const date = new Date();
-  console.log('setCookie',date.setTime(cexp + 600))
-  
-  date.setTime(Date.now()+( 0.25 * 24 * 60 * 60 * 1000) );
-
-  console.log(date)
+  date.setTime(cexp);
   document.cookie = `${cname}=${cvalue};expires=${date.toUTCString()}`  
-  console.log(getCookie('token'))
 }
 
 export const getCookie = (name) =>{

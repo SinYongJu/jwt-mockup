@@ -19,8 +19,8 @@ const config = require('./config.js')
  * 
  */
 
-const setIat = () => Math.floor(Date.now() / 1000) - 30
-const setExp = () => Math.floor(Date.now() / 1000) + (60 * 3)
+const setIat = () => Date.now()+( 0.25 * 24 * 60 * 60 * 1000)
+const setExp = () => Date.now()+( 0.25 * 24 * 60 * 60 * 1000) + (10)
 
 const user = {
   data : {id : 1 ,
@@ -61,12 +61,16 @@ router.post('/auth',(req,res) => {
 
 router.post('/verify',(req,res) => {
   const token = req.header('Authorization').split(' ')[1];
-  console.log('verify acccess')
   jwt.verify(token, config.secret,(err, decoded)=> {
     if(err){
-      return res.status(500).json({code : 500, message : err, auth : false})
+      console.log(err)
+      if(err.message == 'jwt expired' || err.message == 'jwt malformed'){
+        return res.status(403).json({code : 403, message : err, auth : false})
+      }else{
+        return res.status(500).json({code : 500, message : err, auth : false})
+      }
     }
-    console.log(decoded) // data
+    console.log('verify',decoded) // data
     return res.json({code : 200, message : 'success', auth : true})
   });
   
