@@ -1,8 +1,8 @@
-import React,{useState,useEffect,useContext} from 'react';
-import { withRouter } from 'react-router-dom'
-import style from './Form.scss'
+import React,{useState,useContext} from 'react';
 import {FormContext} from '../context/FormContext'
 import {login} from '../api/auth'
+import style from './Form.scss'
+
 
 
 
@@ -25,14 +25,18 @@ const Form = (props) =>{
 
 
   const errorHandler = (err) => console.log(err)
+
   const onSubmit = (e) => {
     
     e.preventDefault();
       const body = {name : userName , pwd};
-      login(body,(data) => {
-        settingToken(data)        
-        props.history.push('/') // home 진입  
-      },errorHandler)
+      login(body).then(
+        (data) => {
+          console.log(data)
+          settingToken(data.token)// 토큰 저장        
+          props.history.push('/') // home 진입  
+        }
+      ).catch(errorHandler)
     
   }
 

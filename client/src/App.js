@@ -1,8 +1,8 @@
-import React,{useContext,useEffect,useState} from 'react';
+import React,{useContext} from 'react';
 import Header from './components/Header'
 import Form from './components/Form'
 import {FormContext,FormProvider} from './context/FormContext'
-import { BrowserRouter as Router, Route, Link ,Switch, Redirect } from "react-router-dom";
+import { BrowserRouter as Router, Route ,Switch, Redirect } from "react-router-dom";
 
 const Home = () => {
   return (<h2>Home</h2>)
@@ -16,14 +16,12 @@ const Private = () => {
 
 const App = () => {
   const PrivateRoute = ({component : Component, ...rest}) => {
-    const {isAuth,isDoingAuth} = useContext(FormContext)
+    const {isAuth,isLogined} = useContext(FormContext)
+    isLogined()
     return (
       <Route
       {...rest}
       render ={ (props) => {
-        isDoingAuth(() =>{
-          alert('login again')
-        })
         return isAuth ? <Component {...props}></Component> : <Redirect to={{ pathname: "/login", state: { from: props.location }}}/>
       }
       }>  

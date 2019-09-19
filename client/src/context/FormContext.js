@@ -1,60 +1,49 @@
 import React,{useState,useEffect,createContext} from 'react';
-import {setCookie, getCookie ,deleteCookie} from '../util/cookie';
-import {verify} from '../api/auth'
+import {isLogIn,logout} from '../api/auth'
+import decoded from "jwt-decode";
 
 const FormContext = createContext();
 
-const authCookieCheck = () => {
-  return (getCookie('token').length > 0) ? true : false
-}
 
 const FormProvider = (props) => {
-  const [isAuth, setIsAuth] = useState(authCookieCheck())
+  const [isAuth, setIsAuth] = useState(isLogIn())
   const [token, setToken] = useState()
   const [timer, setTimer] = useState(0)
 
+
   const settingToken = (token)=> setToken(token)
   const removeToken = ()=> {
-    deleteCookie('token')
+    
+    console.log('call removeToken')
     setIsAuth(false)
     setToken('')
+    logout()
   }
-
   useEffect(()=>{
-    if(token && token.message){
-      console.log(token)
-      setTimer(token.exp - token.iat)
-      setCookie('token',token.token,token.exp)
+    if(isLogIn() && token){      
+      const parsedToken = decoded(token);
+      const { iat , exp } = parsedToken;
+      setTimer(exp - iat)
       setIsAuth(true)
     }
   },[token])
 
+  useState(() => {
+    console.log('isAuth')
+  },[isAuth])
 
-
-  const isDoingAuth = (fail)=> {
-    const vetifyToken = getCookie('token');
-    if(isAuth && vetifyToken){
-      console.log('verify')
-      verify(vetifyToken,
-        (data)=>{
-          console.log('success')
-          setIsAuth(true)
-        },
-        (err)=>{
-          removeToken()
-          setIsAuth(false)
-          fail(err)
-          return
-      })
+  const isLogined = () => {
+    console.log(isAuth)
+    console.log('call isLogined')
+    if(isAuth && isLogIn()){
+      setIsAuth(true)
     }else{
       setIsAuth(false)
-      return fail()
     }
   }
   
-
   return <FormContext.Provider 
-  value={{token, settingToken ,isAuth, authCookieCheck,isDoingAuth,removeToken,timer}}
+  value={{token, settingToken ,isAuth,isLogined,removeToken,timer}}
   >{props.children}</FormContext.Provider>
 }
 

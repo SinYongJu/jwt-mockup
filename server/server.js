@@ -32,6 +32,11 @@ const user = {
 
 /**
  * 
+ * 단방향 암호화 방식 
+ * 클라이언트 : 디코드
+ * 서버 : 토큰만 날려라 ! 토큰외에 다른 정보를 날리지 않는다 변조가 가능하므로 
+ * 민감성 정보 X , 토큰 안에 들어간건 노출 X 
+ * 
  * 공부 할것 
  * 1. async await . promise
  * 2. generater
@@ -44,6 +49,11 @@ app.use(bodyParser.urlencoded({extended : false}))
 app.use(bodyParser.json())
 app.use(cors())
 app.use(router)
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Headers', 'Content-type,Authorization');
+  next();
+});
 
 router.post('/auth',(req,res) => {
   
@@ -58,8 +68,6 @@ router.post('/auth',(req,res) => {
      res.status(200).json({
         code : '200',
         message : 'success',
-        exp : tokenUserData.exp,
-        iat : tokenUserData.iat,
         token
       })
     })
@@ -71,27 +79,28 @@ router.post('/auth',(req,res) => {
 
 })
 
-router.post('/verify',(req,res) => {
-  const token = req.header('Authorization').split(' ')[1];
-  jwt.verify(token, SECRET,(err, decoded)=> {
-    if(err){
-      console.log(err)
-      if(err.message == 'jwt expired' || err.message == 'jwt malformed'){
-        return res.status(403).json({code : 403, message : err, auth : false})
-      }else{
-        return res.status(500).json({code : 500, message : err, auth : false})
-      }
-    }
-    console.log('verify',decoded) // data
-    return res.json({code : 200, message : 'success', auth : true})
-  });
+// router.post('/verify',(req,res) => {
+//   const token = req.header('Authorization').split(' ')[1];
+//   jwt.verify(token, SECRET,(err, decoded)=> {
+//     if(err){
+//       console.log(err)
+//       if(err.message == 'jwt expired' || err.message == 'jwt malformed'){
+//         return res.status(403).json({code : 403, message : err, auth : false})
+//       }else{
+//         return res.status(500).json({code : 500, message : err, auth : false})
+//       }
+//     }
+//     console.log('verify',decoded) // data
+//     return res.json({code : 200, message : 'success', auth : true})
+//   });
   
-})
+// })
 
 router.get('/',(req,res) => {
   console.log('get')
   res.send('Hello World')
 })
+
 
 
 app.listen(PORT,()=>{
