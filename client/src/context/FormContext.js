@@ -8,11 +8,10 @@ const authCookieCheck = () => {
   return (getCookie('token').length > 0) ? true : false
 }
 
-
-
 const FormProvider = (props) => {
   const [isAuth, setIsAuth] = useState(authCookieCheck())
   const [token, setToken] = useState()
+  const [timer, setTimer] = useState(0)
 
   const settingToken = (token)=> setToken(token)
   const removeToken = ()=> {
@@ -23,42 +22,39 @@ const FormProvider = (props) => {
 
   useEffect(()=>{
     if(token && token.message){
-      console.log('token',token.exp)
+      console.log(token)
+      setTimer(token.exp - token.iat)
       setCookie('token',token.token,token.exp)
       setIsAuth(true)
     }
   },[token])
 
-  const isDoingAuth = (success, fail)=> {
-    const vetifyToken = getCookie('token');
 
+
+  const isDoingAuth = (fail)=> {
+    const vetifyToken = getCookie('token');
     if(isAuth && vetifyToken){
       console.log('verify')
       verify(vetifyToken,
         (data)=>{
-          setIsAuth(true)
           console.log('success')
-          success(data)
-          return true
+          setIsAuth(true)
         },
         (err)=>{
           removeToken()
           setIsAuth(false)
-          alert('login again')
-          console.log('fail')
           fail(err)
-          return false
-        }
-      ) // return bool
+          return
+      })
     }else{
-      alert('login again')
       setIsAuth(false)
-      fail()
+      return fail()
     }
   }
+  
 
   return <FormContext.Provider 
-  value={{token, settingToken ,isAuth, authCookieCheck,isDoingAuth,removeToken}}
+  value={{token, settingToken ,isAuth, authCookieCheck,isDoingAuth,removeToken,timer}}
   >{props.children}</FormContext.Provider>
 }
 

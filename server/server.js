@@ -59,6 +59,7 @@ router.post('/auth',(req,res) => {
         code : '200',
         message : 'success',
         exp : tokenUserData.exp,
+        iat : tokenUserData.iat,
         token
       })
     })

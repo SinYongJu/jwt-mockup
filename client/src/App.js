@@ -1,4 +1,4 @@
-import React,{useContext} from 'react';
+import React,{useContext,useEffect,useState} from 'react';
 import Header from './components/Header'
 import Form from './components/Form'
 import {FormContext,FormProvider} from './context/FormContext'
@@ -14,28 +14,26 @@ const Private = () => {
   return (<h2>Private</h2>)
 }
 
-
 const App = () => {
-  let title = 'Home';
-
-
-const PrivateRoute = ({component : Component, ...rest}) => {
-  const {isAuth,isDoingAuth} = useContext(FormContext)
- 
-  return (
-    <Route
-    {...rest}
-    render ={ (props) => {
-      isDoingAuth(() =>{ },() =>{ props.history.push('/login') })
-      return isAuth ? <Component {...props}></Component> : <Redirect to={{ pathname: "/login", state: { from: props.location }}}/>
+  const PrivateRoute = ({component : Component, ...rest}) => {
+    const {isAuth,isDoingAuth} = useContext(FormContext)
+    return (
+      <Route
+      {...rest}
+      render ={ (props) => {
+        isDoingAuth(() =>{
+          alert('login again')
+        })
+        return isAuth ? <Component {...props}></Component> : <Redirect to={{ pathname: "/login", state: { from: props.location }}}/>
       }
-    }>  
-    </Route>
-  )
-}
+      }>  
+      </Route>
+    )
+  }
   return (
+    <>
+  <FormProvider>
     <div className="App">
-      <FormProvider>
        <Router>
           <Header>JWT-Mockup</Header>
           <div>
@@ -47,8 +45,9 @@ const PrivateRoute = ({component : Component, ...rest}) => {
             </Switch>
           </div>
       </Router>
-      </FormProvider>
     </div>
+    </FormProvider>
+    </>
   );
 }
 
