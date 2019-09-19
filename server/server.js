@@ -6,6 +6,7 @@ const PORT = 8080;
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const config = require('./config.js')
+const SECRET = config.secret
 
 
 // jwt
@@ -19,17 +20,25 @@ const config = require('./config.js')
  * 
  */
 
-const setIat = () => Date.now()+( 0.25 * 24 * 60 * 60 * 1000)
-const setExp = () => Date.now()+( 0.25 * 24 * 60 * 60 * 1000) + (10)
+const setIat = () => Date.now()+ 1000
+const setExp = () => Date.now()+ 1000 + 10000 // 10초 추가
 
 const user = {
   data : {id : 1 ,
-          name : 'lukas',
-          pwd : '1234'
+          name : "lukas",
+          pwd : "1234"
         }
 }
 
-
+/**
+ * 
+ * 공부 할것 
+ * 1. async await . promise
+ * 2. generater
+ * 3. 전개 연산자 
+ * 4. 모듈 패턴?! 
+ * 
+ */
 
 app.use(bodyParser.urlencoded({extended : false}))
 app.use(bodyParser.json())
@@ -37,11 +46,12 @@ app.use(cors())
 app.use(router)
 
 router.post('/auth',(req,res) => {
+  
   console.log('request body',req.body)
   if(req.body.pwd === user.data.pwd && req.body.name === user.data.name){
     console.log('access')
-    const tokenUserData = {...user, iat: setIat(),exp: setExp()}
-    jwt.sign(tokenUserData,config.secret,(err, token)=>{
+    const tokenUserData = {name : user.data.name, id : user.data.id, iat: setIat(),exp: setExp()}
+    jwt.sign(tokenUserData,SECRET,(err, token)=>{
       if(err){
         console.log(err)
       }
@@ -57,11 +67,12 @@ router.post('/auth',(req,res) => {
       code : '403',
       message : 'Forbidden'})
   }
+
 })
 
 router.post('/verify',(req,res) => {
   const token = req.header('Authorization').split(' ')[1];
-  jwt.verify(token, config.secret,(err, decoded)=> {
+  jwt.verify(token, SECRET,(err, decoded)=> {
     if(err){
       console.log(err)
       if(err.message == 'jwt expired' || err.message == 'jwt malformed'){

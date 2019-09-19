@@ -30,8 +30,9 @@ const FormProvider = (props) => {
   },[token])
 
   const isDoingAuth = (success, fail)=> {
-    const vetifyToken = getCookie('token')
-    if(isAuth){
+    const vetifyToken = getCookie('token');
+
+    if(isAuth && vetifyToken){
       console.log('verify')
       verify(vetifyToken,
         (data)=>{
@@ -42,12 +43,17 @@ const FormProvider = (props) => {
         },
         (err)=>{
           removeToken()
+          setIsAuth(false)
           alert('login again')
           console.log('fail')
           fail(err)
           return false
         }
       ) // return bool
+    }else{
+      alert('login again')
+      setIsAuth(false)
+      fail()
     }
   }
 
