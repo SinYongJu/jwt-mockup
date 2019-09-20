@@ -1,8 +1,9 @@
 import React,{useContext} from 'react';
 import Header from './components/Header'
 import Form from './components/Form'
-import {FormContext,FormProvider} from './context/FormContext'
+import {AuthContext,AuthProvider} from './context/AuthContext'
 import { BrowserRouter as Router, Route ,Switch, Redirect } from "react-router-dom";
+import Verify from './components/Verify';
 
 const Home = () => {
   return (<h2>Home</h2>)
@@ -16,8 +17,8 @@ const Private = () => {
 
 const App = () => {
   const PrivateRoute = ({component : Component, ...rest}) => {
-    const {isAuth,isLogined} = useContext(FormContext)
-    isLogined()
+    const {isAuth,isLogin} = useContext(AuthContext)
+    isLogin()
     return (
       <Route
       {...rest}
@@ -30,21 +31,20 @@ const App = () => {
   }
   return (
     <>
-  <FormProvider>
+  <AuthProvider>
     <div className="App">
        <Router>
           <Header>JWT-Mockup</Header>
-          <div>
-            <Switch>
-              <PrivateRoute path="/" exact component={Home}></PrivateRoute>
-              <PrivateRoute path="/private" exact component={Private}></PrivateRoute>
-              <Route path="/login" component={Form}></Route>
-              <Route path="*" component={NotFound}></Route>
-            </Switch>
-          </div>
+          <Verify></Verify>  
+          <Switch>
+            <PrivateRoute path="/" exact component={Home}></PrivateRoute>
+            <PrivateRoute path="/private" exact component={Private}></PrivateRoute>
+            <Route path="/login" component={Form}></Route>
+            <Route path="*" component={NotFound}></Route>
+          </Switch>
       </Router>
     </div>
-    </FormProvider>
+    </AuthProvider>
     </>
   );
 }

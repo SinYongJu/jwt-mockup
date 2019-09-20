@@ -55,53 +55,42 @@ app.use((req, res, next) => {
   next();
 });
 
-router.post('/auth',(req,res) => {
-  
+router.post('/auth',(req,res) => {  
   console.log('request body',req.body)
   if(req.body.pwd === user.data.pwd && req.body.name === user.data.name){
     console.log('access')
     const tokenUserData = {name : user.data.name, id : user.data.id, iat: setIat(),exp: setExp()}
-    jwt.sign(tokenUserData,SECRET,(err, token)=>{
-      if(err){
-        console.log(err)
-      }
+    
+    const accessToken = jwt.sign(tokenUserData,SECRET)
+    delete tokenUserData.name,tokenUserData.id,tokenUserData.iat
+    tokenUserData.exp = setExp() + 180000
+    const refreshToken = jwt.sign(tokenUserData,SECRET)
+
      res.status(200).json({
         code : '200',
         message : 'success',
-        token
+        accessToken,
+        refreshToken
       })
-    })
-  }else{
-    res.status(403).json({
-      code : '403',
-      message : 'Forbidden'})
   }
-
 })
 
-// router.post('/verify',(req,res) => {
-//   const token = req.header('Authorization').split(' ')[1];
-//   jwt.verify(token, SECRET,(err, decoded)=> {
-//     if(err){
-//       console.log(err)
-//       if(err.message == 'jwt expired' || err.message == 'jwt malformed'){
-//         return res.status(403).json({code : 403, message : err, auth : false})
-//       }else{
-//         return res.status(500).json({code : 500, message : err, auth : false})
-//       }
-//     }
-//     console.log('verify',decoded) // data
-//     return res.json({code : 200, message : 'success', auth : true})
-//   });
-  
-// })
-
-router.get('/',(req,res) => {
-  console.log('get')
-  res.send('Hello World')
+router.get('/verify',(req,res) => {
+  //const token = req.header('Authorization').split(' ')[1];
+  // jwt.verify(token, SECRET,(err, decoded)=> {
+  //   if(err){
+  //     console.log(err)
+  //     if(err.message == 'jwt expired' || err.message == 'jwt malformed'){
+  //       return res.status(403).json({code : 403, message : err, auth : false})
+  //     }else{
+  //       return res.status(500).json({code : 500, message : err, auth : false})
+  //     }
+  //   }
+  //   console.log('verify',decoded) // data
+  //   return res.json({code : 200, message : 'success', auth : true})
+  // });
+  res.json({code : 200, message : 'success', auth : true})
 })
-
-
 
 app.listen(PORT,()=>{
   console.log(`sever listen ...PORT : ${PORT}`);

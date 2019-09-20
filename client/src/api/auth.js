@@ -1,4 +1,3 @@
-
 import {setCookie, getCookie ,deleteCookie} from '../util/cookie';
 import decode from "jwt-decode";
 
@@ -15,36 +14,6 @@ const URL = 'http://localhost:8080';
 // 가져 온거 프로바이드에 
 // 모든 서버와 통신은 토큰을 가지고 
 
-const commonFetch = (url,option) => {
-  return fetch(url,option)
-    .then(checkStatus)
-    .then(res => res.json())
-}
-
-const commonApiProtocol = (urlString ,method , success, error , whenTokenExpired ) => {
-  if(isTokenExpired) {
-    whenTokenExpired()
-  }
-  const option = {
-    method : method,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'bearer ' + getToken()
-    }
-  }
-  const url = URL+urlString;
-
-  return commonFetch(url,option)
-}
-  
-
-// const commonApiProtocol = ( url,method ,success, error,  ) => {
-  
- 
-  // return ajax(url, option ,success, error)
-  // <= option 추가
-// }
-
   
 /**
  * 
@@ -54,10 +23,6 @@ const commonApiProtocol = (urlString ,method , success, error , whenTokenExpired
  * 
  */
 // 요건 예시로 그냥 써둔거 항상 commonApiProtocol을 거쳐가가 통신한다
-
-export const verify = (token, success, error ) => {
-  commonApiProtocol()
-}
 
 
 export const login = (body) => {
@@ -72,7 +37,7 @@ export const login = (body) => {
   return commonFetch(url, option)
           .then((res)=>{
             console.log(res)
-            setToken(res.token); // Setting the token in cookie
+            setToken(res.accessToken); // Setting the token in cookie
             return res
           })
 }
@@ -81,12 +46,12 @@ export const logout = () =>{
   deleteCookie('token')
 }
 
-export const isLogIn = (callback) => {
+export const isExpiredToken = (callback) => {
   const token = getToken()
-  return !(!token && !isTokenExpired(token))
+  return !(!token && !isAccessTokenExpired(token))
 }
 
-export const isTokenExpired= (token) => {
+export const isAccessTokenExpired= (token) => {
   if(token){
     return !(token.exp < Date.now() / 1000)
   }else{
@@ -114,4 +79,42 @@ const checkStatus = response => {
     error.response = response;
     throw error;
   }
+}
+
+
+const commonFetch = (url,option) => {
+  return fetch(url,option)
+    .then(checkStatus)
+    .then(res => res.json())
+}
+
+const commonApiProtocol = (urlString, whenTokenExpired ) => {
+  if(isAccessTokenExpired) {
+    whenTokenExpired && whenTokenExpired()
+  }
+  const option = {
+    method : 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'bearer ' + getToken()
+    }
+  }
+  const url = URL+urlString;
+  return commonFetch(url,{...option},whenTokenExpired)
+}
+
+
+export const verify = async (success, error ) => {
+  const result = await fetch(
+    URL + '/verify',
+    {
+      method : 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'bearer ' + getToken()
+      }
+    }
+  )
+  const response = await result.json();
+  return response
 }

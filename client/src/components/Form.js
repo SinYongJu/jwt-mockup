@@ -1,15 +1,10 @@
 import React,{useState,useContext} from 'react';
-import {FormContext} from '../context/FormContext'
+import {AuthContext} from '../context/AuthContext'
 import {login} from '../api/auth'
 import style from './Form.scss'
 
-
-
-
-
-
 const Form = (props) =>{
-  const {isAuth,settingToken,removeToken} = useContext(FormContext)
+  const {isAuth,settingToken,removeToken} = useContext(AuthContext)
   const [userName, setUserName] = useState('lukas')
   const [pwd, setPwd] = useState('1234')
 
@@ -22,18 +17,15 @@ const Form = (props) =>{
     setPwd(e.target.value)
   }
 
-
-
   const errorHandler = (err) => console.log(err)
 
   const onSubmit = (e) => {
-    
     e.preventDefault();
       const body = {name : userName , pwd};
       login(body).then(
         (data) => {
           console.log(data)
-          settingToken(data.token)// 토큰 저장        
+          settingToken(data.accessToken)// 토큰 저장        
           props.history.push('/') // home 진입  
         }
       ).catch(errorHandler)
