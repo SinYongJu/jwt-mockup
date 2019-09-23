@@ -1,10 +1,11 @@
 import React,{useState,useContext} from 'react';
 import {AuthContext} from '../context/AuthContext'
-import {login} from '../api/auth'
+import {withRouter} from "react-router";
 import style from './Form.scss'
 
 const Form = (props) =>{
-  const {isAuth,settingToken,removeToken} = useContext(AuthContext)
+
+  const {isAuth, authLogout , onSubmit} = useContext(AuthContext)
   const [userName, setUserName] = useState('lukas')
   const [pwd, setPwd] = useState('1234')
 
@@ -17,31 +18,20 @@ const Form = (props) =>{
     setPwd(e.target.value)
   }
 
-  const errorHandler = (err) => console.log(err)
-
-  const onSubmit = (e) => {
-    e.preventDefault();
-      const body = {name : userName , pwd};
-      login(body).then(
-        (data) => {
-          console.log(data)
-          settingToken(data.accessToken)// 토큰 저장        
-          props.history.push('/') // home 진입  
-        }
-      ).catch(errorHandler)
-    
-  }
-
   const onClickLogout = ()=>{
     console.log('click')
-    removeToken();
+    authLogout();
   }
 
   return (
     <>
     <h2>Login</h2>
-    <button type="button" className="logout" onClick={onClickLogout}>Logout</button>
-    <form className="formLogin" method="POST" onSubmit={onSubmit}>
+    <button type="button" className="logout" onClick={(e) => onClickLogout(e,{ name : userName , pwd })
+      }>Logout</button>
+    <form className="formLogin" method="POST" onSubmit={(e) => onSubmit(e,{ name : userName , pwd },(data) => {
+          console.log('login FORM js')
+          props.history.push('/')
+    })}>
       <fieldset>
         <legend>Login field</legend>
         {!isAuth ? 
@@ -62,4 +52,4 @@ const Form = (props) =>{
   )
 }
 
-export default Form;
+export default withRouter(Form);

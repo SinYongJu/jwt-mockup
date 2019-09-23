@@ -2,7 +2,8 @@ import {setCookie, getCookie ,deleteCookie} from '../util/cookie';
 import decode from "jwt-decode";
 
 const URL = 'http://localhost:8080';
-
+const ACCESS_TOKEN = 'ACCESS_TOKEN'
+const REFRESH_TOKEN = 'REFRESH_TOKEN'
 /**
  * 로그인 기능의 분리
  * 토큰만 날려서 알 수 있개 
@@ -37,21 +38,24 @@ export const login = (body) => {
   return commonFetch(url, option)
           .then((res)=>{
             console.log(res)
-            setToken(res.accessToken); // Setting the token in cookie
+            setToken(res.accessToken,ACCESS_TOKEN) // Setting the token in cookie
+            setToken(res.refreshToken,REFRESH_TOKEN)
             return res
           })
 }
 
 export const logout = () =>{
-  deleteCookie('token')
+  deleteCookie(ACCESS_TOKEN)
+  deleteCookie(REFRESH_TOKEN)
 }
 
-export const isExpiredToken = (callback) => {
-  const token = getToken()
-  return !(!token && !isAccessTokenExpired(token))
-}
 
-export const isAccessTokenExpired= (token) => {
+
+const isExpiredToken = (token_name,callback) => {
+  const token = getToken(token_name)
+  return !(!token && !defineExpired(token))
+}
+const defineExpired= (token) => {
   if(token){
     return !(token.exp < Date.now() / 1000)
   }else{
@@ -60,13 +64,13 @@ export const isAccessTokenExpired= (token) => {
   }
 }
 
-export const setToken = (token) =>{
-  return setCookie('token',token,decode(token).exp)
+const setToken = (token, cname) =>{
+  return setCookie(cname, token, decode(token).exp)
 }
 
 
-export const getToken = () =>{
-  return getCookie('token')
+const getToken = (token_name) =>{
+  return getCookie(token_name)
 }
 
 const checkStatus = response => {
@@ -89,32 +93,50 @@ const commonFetch = (url,option) => {
 }
 
 const commonApiProtocol = (urlString, whenTokenExpired ) => {
-  if(isAccessTokenExpired) {
+  if(isExpiredToken(ACCESS_TOKEN)) {
     whenTokenExpired && whenTokenExpired()
   }
   const option = {
     method : 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'bearer ' + getToken()
+      'Authorization': 'bearer ' + getToken(ACCESS_TOKEN)
     }
   }
   const url = URL+urlString;
   return commonFetch(url,{...option},whenTokenExpired)
 }
 
-
-export const verify = async (success, error ) => {
+const refresh = async () => {
   const result = await fetch(
-    URL + '/verify',
+    URL + '/refresh',
     {
-      method : 'GET',
+      method : 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'bearer ' + getToken()
+        'Authorization': 'bearer ' + getToken(REFRESH_TOKEN)
       }
     }
   )
-  const response = await result.json();
-  return response
+  return result.json()
+}
+export const checkAccessToken = () => {
+  return isExpiredToken(ACCESS_TOKEN)
+}
+
+export const checkRefreshToken = () => {
+  return getToken(REFRESH_TOKEN) && refresh(REFRESH_TOKEN).then((data)=>{     
+    console.log('checkRefreshToken',data)
+    if(data.auth){
+      setToken(data.accessToken, ACCESS_TOKEN) // Setting the token in cookie
+      setToken(data.refreshToken ,REFRESH_TOKEN)
+      return data
+    }else{
+      return false
+    }
+  }) 
+}
+
+const getVerifyList = () => {
+  commonApiProtocol('/verify').then(data => console.log(data))
 }
