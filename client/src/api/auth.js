@@ -27,7 +27,7 @@ const REFRESH_TOKEN = 'REFRESH_TOKEN'
 
 
 export const login = (body) => {
-  const url = URL + '/auth'
+  const url = URL + '/auth/sign'
   const option = {
     method : 'post',
     headers: {
@@ -83,7 +83,7 @@ const checkStatus = response => {
     // Success status lies between 200 to 300
     return response;
   } else {
-    var error = new Error(response.statusText);
+    const error = new Error(response.statusText);
     error.response = response;
     throw error;
   }
@@ -121,7 +121,7 @@ export const commonApiProtocol = (urlString,opt,whenTokenExpired) => {
 
 const refresh = async () => {
   const result = await fetch(
-    URL + '/refresh',
+    URL + '/auth/refresh',
     {
       method : 'POST',
       headers: {

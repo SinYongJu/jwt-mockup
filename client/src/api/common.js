@@ -1,7 +1,16 @@
 import { commonApiProtocol } from './auth';
+import { callbackify } from 'util';
 
 
-const getVerifyList = async () => {
-  const verifyList =  await commonApiProtocol('/verify').then(data => console.log(data))
+export const getList = async (error) => {
+  try{
+    const list =  await commonApiProtocol('/list').then(data => console.log(data));
+
+  }catch(err){
+    console.log(err)
+     alert('go to Login')
+    error(err)
+  }
+
   
 }

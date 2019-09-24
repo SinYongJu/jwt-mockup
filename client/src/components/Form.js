@@ -1,6 +1,7 @@
 import React,{useState,useContext} from 'react';
 import {AuthContext} from '../context/AuthContext'
 import {withRouter} from "react-router";
+import {getList} from '../api/common'
 import style from './Form.scss'
 
 const Form = (props) =>{
@@ -16,6 +17,9 @@ const Form = (props) =>{
     setPwd(e.target.value)
   }
   const onClickLogout = ()=>{
+    getList(()=>{
+      props.history.push('/')
+    })
     console.log('click loggout')
     authLogout();
   }

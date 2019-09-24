@@ -3,10 +3,10 @@ const router  =  express.Router();
 const app = express();
 const bodyParser = require('body-parser');
 const PORT = 8080;
-const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const config = require('./config.js')
-const SECRET = config.secret
+const {jwtSignUp,jwtRefresh} = require('./middleware/jwtToken')
+const {getlist} = require('./middleware/getlist')
+
 
 
 // jwt
@@ -23,13 +23,7 @@ const SECRET = config.secret
 const setIat = () => Date.now()+ 1000
 const setExp = () => Date.now()+ 1000 + 10000 // 10초 추가
 
-const user = {
-  data : {id : 1 ,
-          name : "lukas",
-          pwd : "1234",
-          role : 'admin'
-        }
-}
+
 
 /**
  * 
@@ -57,52 +51,60 @@ app.use((req, res, next) => {
 });
 
 
-function tokenMaker(){
-  const tokenUserData = {"name" : user.data.name, "id" : user.data.id, "role" : user.data.role, iat: setIat(),exp: setExp()}
-  const accessToken = jwt.sign(tokenUserData,SECRET)
-  delete tokenUserData.name,tokenUserData.id,tokenUserData.iat
-  tokenUserData.exp = setExp() + 10000
-  const refreshToken = jwt.sign(tokenUserData,SECRET)
-  return {accessToken, refreshToken}
-}
+// function tokenMaker(){
+//   const tokenUserData = {"name" : user.data.name, "id" : user.data.id, "role" : user.data.role, iat: setIat(),exp: setExp()}
+//   const accessToken = jwt.sign(tokenUserData,SECRET)
+//   delete tokenUserData.name,tokenUserData.id,tokenUserData.iat
+//   tokenUserData.exp = setExp() + 10000
+//   const refreshToken = jwt.sign(tokenUserData,SECRET)
+//   return {accessToken, refreshToken}
+// }
 
-router.post('/auth',(req,res) => {  
+router.post('/auth/sign',(req,res) => {  
   console.log('request body',req.body)
-  
-  if(req.body.pwd === user.data.pwd && req.body.name === user.data.name){
-    console.log('access')
-    const {accessToken , refreshToken} = tokenMaker();
-    
-    res.status(200).json({
-        code : '200',
-        message : 'success',
-        accessToken,
-        refreshToken
+  jwtSignUp(req.body ,()=>{
+    res.status(403).json({
+      code : '403',
+      message : 'no sign',
     })
-
-  }
+  }, (accessToken , refreshToken)=>{
+    console.log('sign')
+    res.status(200).json({
+      code : '200',
+      message : 'success',
+      accessToken,
+      refreshToken
+    })
+  })
 })
 
-router.post('/refresh',(req,res) => {
+router.post('/auth/refresh',(req,res) => {
   console.log('refresh')
   const token = req.header('Authorization').split(' ')[1];
   console.log(token)
-  
-  jwt.verify(token, SECRET,(err, decoded)=> {
-    if(err){
-      console.log(err)
-      if(err.message == 'jwt expired' || err.message == 'jwt malformed'){
-        return res.status(403).json({code : 403, message : err, auth : false})
-      }else{
-        return res.status(500).json({code : 500, message : err, auth : false})
+  jwtRefresh(token,
+      (err) => {
+          return res.status(err.code).json(err)
+      },
+      (result) => {
+          return res.status(result.code).json(result)
       }
-    }
-    const {accessToken , refreshToken} = tokenMaker();
-    console.log('refresh',decoded) // data
-    return res.json({code : 200, message : 'success', accessToken, refreshToken,auth : true})
-  });
-})
 
+  ) 
+})
+router.get('/list',(req,res) => {
+  console.log('list')
+  const token = req.header('Authorization').split(' ')[1];
+  getlist(token,
+    (err) => {
+        return res.status(err.code).json(err)
+    },
+    (data,result) => {
+        return res.status(result.code).json(data)
+    }
+
+) 
+})
 app.listen(PORT,()=>{
   console.log(`sever listen ...PORT : ${PORT}`);
 })

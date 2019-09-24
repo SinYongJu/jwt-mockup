@@ -1,0 +1,21 @@
+
+{
+    "userData" : [
+        {
+            "id" : 1 ,
+            "name" : "lukas",
+            "pwd" : "1234",
+            "role" : "admin"
+        }
+    ],
+    "images" :[
+            {   
+                "id" : 1,
+                "filename" : "im_01.png"               
+            }
+        ]
+        
+    
+      
+}
+
