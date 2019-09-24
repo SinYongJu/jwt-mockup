@@ -37,7 +37,7 @@ export const login = (body) => {
   }  
   return commonFetch(url, option)
           .then((res)=>{
-            console.log(res)
+            console.log('login Fetch')
             setToken(res.accessToken,ACCESS_TOKEN) // Setting the token in cookie
             setToken(res.refreshToken,REFRESH_TOKEN)
             return res
@@ -73,6 +73,10 @@ const getToken = (token_name) =>{
   return getCookie(token_name)
 }
 
+export const getDecodedToken = () =>{
+  return decode(getCookie(ACCESS_TOKEN))
+}
+
 const checkStatus = response => {
   // raises an error in case response status is not a success
   if (response.status >= 200 && response.status < 300) {
@@ -92,10 +96,18 @@ const commonFetch = (url,option) => {
     .then(res => res.json())
 }
 
-const commonApiProtocol = (urlString, whenTokenExpired ) => {
+/**
+ * 
+ * @param {*} url : request url
+ * @param {*} opt : fetch option object
+ * @param {*} whenTokenExpired  : expired Token callback
+ */
+export const commonApiProtocol = (urlString,opt,whenTokenExpired) => {
+  
   if(isExpiredToken(ACCESS_TOKEN)) {
     whenTokenExpired && whenTokenExpired()
   }
+
   const option = {
     method : 'GET',
     headers: {
@@ -104,7 +116,7 @@ const commonApiProtocol = (urlString, whenTokenExpired ) => {
     }
   }
   const url = URL+urlString;
-  return commonFetch(url,{...option},whenTokenExpired)
+  return commonFetch(url,{...option,...opt})
 }
 
 const refresh = async () => {
@@ -126,7 +138,6 @@ export const checkAccessToken = () => {
 
 export const checkRefreshToken = () => {
   return getToken(REFRESH_TOKEN) && refresh(REFRESH_TOKEN).then((data)=>{     
-    console.log('checkRefreshToken',data)
     if(data.auth){
       setToken(data.accessToken, ACCESS_TOKEN) // Setting the token in cookie
       setToken(data.refreshToken ,REFRESH_TOKEN)
@@ -135,8 +146,4 @@ export const checkRefreshToken = () => {
       return false
     }
   }) 
-}
-
-const getVerifyList = () => {
-  commonApiProtocol('/verify').then(data => console.log(data))
 }

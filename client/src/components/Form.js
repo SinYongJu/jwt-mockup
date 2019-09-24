@@ -9,27 +9,22 @@ const Form = (props) =>{
   const [userName, setUserName] = useState('lukas')
   const [pwd, setPwd] = useState('1234')
 
-
   const onChangeUserName = (e)=>{
     setUserName(e.target.value)
   }
-
   const onChangePwd = (e)=>{
     setPwd(e.target.value)
   }
-
   const onClickLogout = ()=>{
-    console.log('click')
+    console.log('click loggout')
     authLogout();
   }
-
   return (
     <>
     <h2>Login</h2>
-    <button type="button" className="logout" onClick={(e) => onClickLogout(e,{ name : userName , pwd })
-      }>Logout</button>
-    <form className="formLogin" method="POST" onSubmit={(e) => onSubmit(e,{ name : userName , pwd },(data) => {
-          console.log('login FORM js')
+    <button type="button" className="logout" onClick={onClickLogout}>Logout</button>
+    <form className="formLogin" method="POST" onSubmit={(e) => onSubmit( e,{ name : userName , pwd } ,(data) => {
+          console.log('go to home')
           props.history.push('/')
     })}>
       <fieldset>
@@ -45,7 +40,6 @@ const Form = (props) =>{
         :
         <p>already login</p>
         }
-        
       </fieldset>
     </form>
     </>

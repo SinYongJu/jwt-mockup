@@ -7,18 +7,13 @@ import {AuthProvider} from './context/AuthContext'
 const App = () => {
   return (
     <>    
-    
-    <AuthProvider>
-      <CtxRouter>
+      <AuthProvider>
         <div className="App">
-    
-        
-        
-        
+          <CtxRouter>
+
+          </CtxRouter>
         </div>
-      </CtxRouter>
       </AuthProvider>
-    
     </>
   );
 }

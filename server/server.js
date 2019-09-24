@@ -26,7 +26,8 @@ const setExp = () => Date.now()+ 1000 + 10000 // 10초 추가
 const user = {
   data : {id : 1 ,
           name : "lukas",
-          pwd : "1234"
+          pwd : "1234",
+          role : 'admin'
         }
 }
 
@@ -57,7 +58,7 @@ app.use((req, res, next) => {
 
 
 function tokenMaker(){
-  const tokenUserData = {name : user.data.name, id : user.data.id, iat: setIat(),exp: setExp()}
+  const tokenUserData = {"name" : user.data.name, "id" : user.data.id, "role" : user.data.role, iat: setIat(),exp: setExp()}
   const accessToken = jwt.sign(tokenUserData,SECRET)
   delete tokenUserData.name,tokenUserData.id,tokenUserData.iat
   tokenUserData.exp = setExp() + 10000
