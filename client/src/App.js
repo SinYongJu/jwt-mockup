@@ -1,19 +1,13 @@
-import React,{useContext} from 'react';
+import React from 'react';
 import CtxRouter from './route/Router'
-import {AuthProvider} from './context/AuthContext'
-
-
 
 const App = () => {
   return (
-    <>    
-      <AuthProvider>
-        <div className="App">
-          <CtxRouter>
-
-          </CtxRouter>
-        </div>
-      </AuthProvider>
+    <> 
+      <div className="App">
+        <CtxRouter>
+        </CtxRouter>
+      </div>
     </>
   );
 }

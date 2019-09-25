@@ -1,54 +1,48 @@
 import React,{useState,useEffect,createContext} from 'react';
 import {login ,logout ,checkAccessToken , checkRefreshToken, getDecodedToken} from '../api/auth'
 import UserInfo from '../user/userInfo'
+import {withRouter} from "react-router";
 
 const  AuthContext = createContext();
 // https 프로토콜 
 
-const AuthProvider = (props) => {
+const AuthProviderNoRouter = (props) => {
   const userInfoForm = {
-    "name": 'user1',
+    "name": 'user0',
     "id": 0,
     "role": 'guest'
   }
+  
   const userInfoObj = new UserInfo(userInfoForm);
   const [isAuth, setIsAuth] = useState(false)  
   const [userInfo, setUserInfo] = useState(userInfoObj)
-  
-  React.useMemo(()=> {
-    console.log('call')
-  },[userInfo])
-  
-  const authLogout = ()=> {
+
+  const authLogoutHandler = ()=> {
     console.log('call removeToken')
+    tokenExpiredHandler()
+  }
+
+  const tokenExpiredHandler = () => {
     setIsAuth(false)
     setUserInfo(userInfoObj)// 공백으로 만들기 초기화
+    goToAddress('/login')
     logout()
+  }
+  const goToAddress = (url) => {
+    return props.history.push(url)
   }
 
   const setUserInfoData = token =>  {
     // token 파싱은 auth.js 에서 수행
     // 유효성 검사까지 auth.js 
     const {name, role, id} = token
-    
-    const userData = {"name":name, 'id' : id ,role : role}
-    
-    console.log(userData)
-    
+    const userData = {"name":name, 'id' : id ,role : role}    
     const newUserInfo = new UserInfo(userData)
-    console.log('setUserInfoData', newUserInfo)
     return setUserInfo(newUserInfo)
-    
   }
-  
-
   useEffect(()=>{
     isExpiredToken()
   },[isAuth])
-
-  
-
-  
 
   // 실제 상태값 및 세팅은 여기서 진행하도록 한다
   /*
@@ -59,16 +53,18 @@ const AuthProvider = (props) => {
   const isExpiredToken = async () => {
     try {
       const isAccess = checkAccessToken()
-      if(isAuth && isAccess) {
+      if(isAuth && isAccess && userInfo) {
           console.log('access cli')
           return setIsAuth(true)
       }
       const isRefresh = await checkRefreshToken();
       if(isRefresh){
         console.log('have refresh ', isRefresh)
+        setUserInfoData(getDecodedToken())
         return setIsAuth(true)
       } else { 
         console.log('expired refresh')
+        setUserInfoData(userInfoForm)
         return setIsAuth(false)
       }
     } catch(e) {
@@ -78,24 +74,26 @@ const AuthProvider = (props) => {
     
   }
 
-  const onSubmit = (e, body,callback) => {
-    console.log('클릭')
+  const onSubmit = (e, body) => {
     e.preventDefault();
       login(body).then(data =>{ 
         setIsAuth(true)
         setUserInfoData(getDecodedToken())
         return data
-      }).then(callback).catch(errorHandler)
+      }).then(
+        props.history.push('/')
+      ).catch(errorHandler)
       
   }  
   
   const errorHandler = (err) => console.log(err)
 
   return <AuthContext.Provider 
-  value={{isAuth, userInfo, isExpiredToken, authLogout, onSubmit}}
+  value={{isAuth, userInfo, isExpiredToken,tokenExpiredHandler, authLogoutHandler, onSubmit}}
   >{props.children}</AuthContext.Provider>
 }
 const AuthConsumer = AuthContext.Consumer;
+const AuthProvider = withRouter(AuthProviderNoRouter)
 export {AuthProvider ,AuthContext , AuthConsumer}
 
 

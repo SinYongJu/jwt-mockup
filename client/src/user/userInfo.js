@@ -1,33 +1,35 @@
 
 
 const USER_ROLE = ['admin','user','guest']
-const ID_REG = /^[A-za-z]/g;
+const ID_REG = /(^[ a-z ]+)/g
+const ID_REG_INVALID =  /[~!@#$%^&*()_+|<>?:{}]/gi
 
 export default class UserInfo {
   constructor(info){
-    console.log('UserInfo')
    this.init(info)
   }
 
   init({name, id ,role}){
-    console.log(name)
     this.setName(name);
     this.setId(id);
     this.setRole(role);
   }
   
   validateName(value){
-    console.log(value)
-    return ID_REG.test(value)
+   if(value.match(ID_REG_INVALID)){
+    return false
+   }
+  return value.match(ID_REG)
   }
 
   validateId(value){
+    
     return Number.isInteger(value) && !isNaN(value)
   }
 
   validateRole(value){
     const find = USER_ROLE.find((item)=>{
-      if(item == value ) return true
+      if(item === value ) return true
       return false 
     })
     return (find) ? true : false
@@ -39,10 +41,9 @@ export default class UserInfo {
     return this.name
   } 
   setName(value){
-    // if(this.validateName(value)){
-      console.log('setName',value)
+    if(this.validateName(value)){
       return this.name = value
-    // }
+    }
   }
   
   getId(){
@@ -54,7 +55,6 @@ export default class UserInfo {
       return this.id = value
     }
     return false
-   
   } 
 
   getRole(){

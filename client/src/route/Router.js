@@ -1,10 +1,11 @@
 
-import React,{useContext} from 'react';
+import React from 'react';
 import Header from '../components/Header'
 import Form from '../components/Form'
-import Verify from '../components/Verify';
+import List from '../components/List';
 import { BrowserRouter as Router, Route ,Switch} from "react-router-dom";
 import PrivateRoute from './PrivateRoute'
+import {AuthProvider} from '../context/AuthContext'
 
 
 const Home = () => {
@@ -20,17 +21,19 @@ const Private = () => {
 
 const CtxRouter = () => {
   return (
-    <Router>        
-      <Header>JWT-Mockup</Header>
-      <div className="contents">
-      <Switch>
-        <PrivateRoute path="/private" exact component={Private}></PrivateRoute>
-        <PrivateRoute path="/verify" component={Verify}></PrivateRoute>
-        <Route path="/login" component={Form}></Route>
-        <Route path="/" exact component={Home}></Route>
-        <Route path="*" component={NotFound}></Route>
-      </Switch>
-      </div>
+    <Router>      
+      <AuthProvider>      
+        <Header>JWT-Mockup</Header>
+        <div className="contents">
+        <Switch>
+          <PrivateRoute path="/private" exact component={Private}></PrivateRoute>
+          <PrivateRoute path="/List" component={List}></PrivateRoute>
+          <Route path="/login" component={Form}></Route>
+          <Route path="/" exact component={Home}></Route>
+          <Route path="*" component={NotFound}></Route>
+        </Switch>
+        </div>
+      </AuthProvider>  
     </Router>
   )
 }
